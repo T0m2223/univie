@@ -19,39 +19,44 @@ unsigned char ctab[SAMPLES][LENGTH] = {
 
 int found[LENGTH];
 unsigned char key[LENGTH];
-typedef struct { unsigned char key; size_t count; } keycounter;
 
 void find_key(void) {
-	size_t i, j, k, col = 0;
+	size_t i, j, col = 0;
 
 	for (col = 0; col < LENGTH; ++col) {
-		keycounter counter[SAMPLES * SAMPLES + 1];
-		for (k = 0; k < SAMPLES * SAMPLES + 1; ++k)
-			counter[k].count = 0;
 
 		for (i = 0; i < SAMPLES; ++i) {
 			for (j = i + 1; j < SAMPLES; ++j) {
-				if (!((ctab[i][col] ^ ctab[j][col]) & '@')) continue;
-
-				key[col] = ctab[i][col] ^ ' ';
-				if (!isalpha(key[col] ^ ctab[j][col])) key[col] = ctab[j][col] ^ ' ';
-				int exit = 0;
-				for (k = 0; counter[k].count != 0; ++k) {
-					if (counter[k].key == key[col]) {
-						++counter[k].count;
-						exit = 1;
-						break;
-					}
-				}
-				if (!exit) counter[k] = (keycounter) {key[col], 1};
+				if ((ctab[i][col] ^ ctab[j][col]) & '@') break;
 			}
 
-			found[col] = 0;
-			for (k = 0; counter[k].count != 0; ++k) {
-				if (counter[k].count > found[col]) {
-					found[col] = counter[k].count;
-					key[col] = counter[k].key;
-				}
+			if (j != SAMPLES) {
+				found[col] = 1;
+
+				key[col] = ctab[i][col] ^ ' ';
+				if (isalpha(key[col] ^ ctab[j][col])) continue;
+
+				key[col] = ctab[j][col] ^ ' ';
+				if (isalpha(key[col] ^ ctab[i][col])) continue;
+
+				found[col] = 0;
+			}
+		}
+	}
+}
+
+void clean_key(void) {
+	size_t col, sample;
+	unsigned char c;
+
+	for (col = 0; col < LENGTH; ++col) {
+		if (!found[col]) continue;
+
+		for (sample = 0; sample < SAMPLES; ++sample) {
+			c = ctab[sample][col] ^ key[col];
+			if (!isalpha(c) && c != ' ') {
+				found[col] = 0;
+				break;
 			}
 		}
 	}
@@ -69,10 +74,11 @@ void print_text(size_t sample) {
 	printf("\n");
 }
 
-int main() {
+int main(void) {
 	size_t i;
 
 	find_key();
+	clean_key();
 	for (i = 0; i < SAMPLES; ++i)
 		print_text(i);
 	return 0;
