@@ -24,23 +24,20 @@ void find_key(void) {
 	size_t i, j, col = 0;
 
 	for (col = 0; col < LENGTH; ++col) {
-
 		for (i = 0; i < SAMPLES; ++i) {
-			for (j = i + 1; j < SAMPLES; ++j) {
+			for (j = i + 1; j < SAMPLES; ++j)
 				if ((ctab[i][col] ^ ctab[j][col]) & '@') break;
-			}
+			if (j == SAMPLES) continue;
 
-			if (j != SAMPLES) {
-				found[col] = 1;
+			found[col] = 1;
 
-				key[col] = ctab[i][col] ^ ' ';
-				if (isalpha(key[col] ^ ctab[j][col])) continue;
+			key[col] = ctab[i][col] ^ ' ';
+			if (isalpha(key[col] ^ ctab[j][col])) continue;
 
-				key[col] = ctab[j][col] ^ ' ';
-				if (isalpha(key[col] ^ ctab[i][col])) continue;
+			key[col] = ctab[j][col] ^ ' ';
+			if (isalpha(key[col] ^ ctab[i][col])) continue;
 
-				found[col] = 0;
-			}
+			found[col] = 0;
 		}
 	}
 }
