@@ -21,7 +21,7 @@ int found[LENGTH];
 unsigned char key[LENGTH];
 
 void find_key(void) {
-	size_t i, j, col = 0;
+	size_t i, j, col;
 
 	for (col = 0; col < LENGTH; ++col) {
 		for (i = 0; i < SAMPLES; ++i) {
